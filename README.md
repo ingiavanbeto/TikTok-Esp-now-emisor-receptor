@@ -30,6 +30,34 @@ Este proyecto acompaña al video de **ESP-NOW** del canal de TikTok **«Profe Iv
 
 ---
 
+## 🚦 Paso 0 (obligatorio): obtén la MAC de cada placa
+
+**Sin este paso, los códigos de emisor y receptor NO funcionan.** ESP-NOW no usa contraseñas ni se conecta a una red: cada placa se identifica con su **dirección MAC**, y el emisor necesita conocer la MAC del receptor para poder registrarlo como par y enviarle paquetes. Si la MAC está mal, simplemente no llega nada.
+
+Para obtenerla, este repositorio incluye el sketch **[`obtener_mac/obtener_mac.ino`](obtener_mac/obtener_mac.ino)**:
+
+1. Súbelo a **cada** placa que vayas a usar (emisor y receptores).
+2. Abre el monitor serial a **115200 baudios**.
+3. Anota la MAC de cada placa. El dato se repite cada 5 segundos, por si abriste el monitor tarde.
+
+Esto es lo que imprime:
+
+```
+============================================
+Placa: ESP32-S3
+MAC (formato normal):       24:0A:C4:60:CE:30
+MAC (para pegar en emisor): { 0x24, 0x0A, 0xC4, 0x60, 0xCE, 0x30 }
+============================================
+```
+
+4. Pega la MAC **del receptor**, en el segundo formato, dentro del arreglo `receptorMAC[]` del código del **emisor**. ¡Y listo, a subir los demás sketches! 🚀
+
+> En este repositorio el emisor viene apuntando a la MAC del **Heltec con pantalla** (`E0:E2:E6:00:8E:3C`) y trae **comentada** la MAC del receptor sin pantalla (`24:0A:C4:60:CE:30`): descomenta la que vayas a usar.
+>
+> 🔑 **Clave:** emisor y receptor fijan el **canal 1** del WiFi. Si los canales no coinciden, no se escuchan.
+
+---
+
 ## 🧪 Hardware probado
 
 | Rol | Placa | Sketch | Notas |
@@ -40,7 +68,11 @@ Este proyecto acompaña al video de **ESP-NOW** del canal de TikTok **«Profe Iv
 
 ---
 
-## 📂 Los 3 sketches
+## 📂 Los códigos del repositorio
+
+### 0️⃣ `obtener_mac` — el paso previo 🔍
+
+El sketch del **Paso 0**: se sube a cualquier placa ESP32 e imprime por Serial su dirección MAC en modo estación (la que usa ESP-NOW), en formato normal y en formato de arreglo de C listo para pegar en el emisor. Sin este dato, emisor y receptor no se pueden enlazar.
 
 ### 1️⃣ `esp_now_emisor` — el que envía 📤
 
@@ -59,20 +91,6 @@ Este proyecto acompaña al video de **ESP-NOW** del canal de TikTok **«Profe Iv
 
 - Todo lo del receptor normal, **más** la pantalla OLED del Heltec (SSD1306 128×64, I2C por software en los pines 15/4/16) usando la librería **U8g2**.
 - La pantalla muestra: su propia MAC, el último contador recibido, el total de paquetes y la MAC del emisor. Se refresca cada 500 ms.
-
----
-
-## ⚠️ Antes de subir el código: la dirección MAC
-
-ESP-NOW no usa contraseñas ni se conecta a una red: cada placa se identifica con su **dirección MAC**, y el emisor necesita saber la MAC del receptor.
-
-1. Sube primero el sketch del **receptor** y abre el monitor serial a **115200 baudios**: al arrancar imprime su MAC (`MAC receptor: ... <-- esta MAC va en el emisor`).
-2. Pega esa MAC en el arreglo `receptorMAC[]` del **emisor**.
-3. Sube el sketch del emisor… ¡y a ver paquetes volar! 🚀
-
-> En este repositorio el emisor viene apuntando a la MAC del **Heltec con pantalla** (`E0:E2:E6:00:8E:3C`) y trae **comentada** la MAC del receptor sin pantalla (`24:0A:C4:60:CE:30`): descomenta la que vayas a usar.
->
-> 🔑 **Clave:** emisor y receptor fijan el **canal 1** del WiFi. Si los canales no coinciden, no se escuchan.
 
 ---
 
